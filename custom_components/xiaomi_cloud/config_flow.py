@@ -122,8 +122,9 @@ class XiaomiCloudlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             with async_timeout.timeout(15, loop=self.hass.loop):
                 r = await session.get(url, headers=self._headers)
-            self._cookies['pass_trace'] = r.headers.getall('Set-Cookie')[2].split(";")[0].split("=")[1]
-            self._sign = pattern.findall(await r.text())[0]
+            self._cookies['pass_trace'] = r.history[0].headers.getall('Set-Cookie')[2].split(";")[0].split("=")[1]
+            _LOGGER.debug("--2---%s",parse.unquote(pattern.findall(r.history[0].headers.getall('Location')[0])[0]))
+            self._sign = parse.unquote(pattern.findall(r.history[0].headers.getall('Location')[0])[0])
             return True
         except BaseException as e:
             _LOGGER.warning(e.args[0])
